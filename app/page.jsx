@@ -139,18 +139,13 @@ export default function Page() {
 
   async function submitReport(event) {
     event.preventDefault();
-    if (step < 3) {
-      if (!canNext) {
-        setMessage('Completa los campos obligatorios.');
-        return;
-      }
-
-      setStep((value) => Math.min(3, value + 1));
+    if (!form.nombre || !form.apellidos || !form.telefono || !form.relacion || !form.ultimaVez || !form.direccion) {
+      setMessage('Completa los campos obligatorios.');
       return;
     }
 
-    if (!form.nombre || !form.apellidos || !form.telefono || !form.relacion || !form.ultimaVez || !form.direccion) {
-      setMessage('Completa los campos obligatorios.');
+    if (step < 3) {
+      setMessage('Pulsa Siguiente para continuar al paso de fotos.');
       return;
     }
 
@@ -385,18 +380,18 @@ export default function Page() {
                     <dt className="col-5">Señas</dt><dd className="col-7">{[selectedReport.age ? `Edad: ${selectedReport.age}.` : '', selectedReport.documentId ? `ID: ${selectedReport.documentId}.` : '', selectedReport.notes || ''].filter(Boolean).join(' ')}</dd>
                   </dl>
 
-                  <div className="d-flex flex-wrap gap-2 mt-3">
-                    <button type="button" className="btn btn-primary btn-sm" onClick={markLocalized}>Marcar localizada</button>
-                  </div>
-
-                  <section className="mt-4 border-top pt-3">
-                    <h3 className="h6 text-uppercase text-secondary mb-3">Datos de quien la localizo</h3>
+                  <section className="mt-4 border-top pt-3 action-panel">
+                    <h3 className="h6 text-uppercase text-secondary mb-3">Reportar como localizada</h3>
+                    <p className="text-secondary small mb-3">Completa estos datos solo si ya encontraste a la persona.</p>
                     <div className="row g-3">
                       <Field label="Nombre" value={localizeForm.localizedByName} onChange={(value) => setLocalizeForm({ ...localizeForm, localizedByName: value })} />
                       <Field label="Telefono" value={localizeForm.localizedByPhone} onChange={(value) => setLocalizeForm({ ...localizeForm, localizedByPhone: value })} />
                       <div className="col-12">
                         <label className="form-label">Nota del hallazgo</label>
                         <textarea className="form-control" rows="3" value={localizeForm.localizedNote} onChange={(e) => setLocalizeForm({ ...localizeForm, localizedNote: e.target.value })} />
+                      </div>
+                      <div className="col-12 d-grid">
+                        <button type="button" className="btn btn-primary" onClick={markLocalized}>Marcar localizada</button>
                       </div>
                     </div>
                   </section>

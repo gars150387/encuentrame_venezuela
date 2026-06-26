@@ -72,6 +72,11 @@ body {
   border-color: #86a8ff;
 }
 
+.action-panel {
+  background: #f8fafc;
+  border-radius: 1rem;
+}
+
 .report-media-wrap {
   position: relative;
   width: 100%;
