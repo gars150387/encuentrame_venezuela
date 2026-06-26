@@ -163,7 +163,7 @@ function isDuplicate(reports, report) {
 
   return reports.some((entry) => {
     const entryName = normalize(`${entry.firstName} ${entry.lastName}`);
-    return entryName === reportName || normalize(entry.phone) === reportPhone;
+    return entryName === reportName && normalize(entry.phone) === reportPhone;
   });
 }
 

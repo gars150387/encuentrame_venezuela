@@ -53,6 +53,22 @@ test('addReport creates a report and blocks duplicates', () => {
   assert.equal(allowed.report.firstName, 'Maria');
 });
 
+test('addReport allows different name or phone', () => {
+  const reports = store.defaultReports();
+
+  const differentPhone = store.addReport(reports, {
+    nombre: 'Maria',
+    apellidos: 'Perez',
+    telefono: '04120000999',
+    relacion: 'Familiar',
+    ultimaVez: '2026-06-25T10:00',
+    direccion: 'Caracas',
+    photos: [],
+  });
+
+  assert.equal(differentPhone.ok, true);
+});
+
 test('updateReportStatus updates the target report', () => {
   const reports = store.defaultReports();
   const result = store.updateReportStatus(reports, 'seed-1', 'localized');
