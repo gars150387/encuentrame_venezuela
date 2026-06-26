@@ -139,6 +139,16 @@ export default function Page() {
 
   async function submitReport(event) {
     event.preventDefault();
+    if (step < 3) {
+      if (!canNext) {
+        setMessage('Completa los campos obligatorios.');
+        return;
+      }
+
+      setStep((value) => Math.min(3, value + 1));
+      return;
+    }
+
     if (!form.nombre || !form.apellidos || !form.telefono || !form.relacion || !form.ultimaVez || !form.direccion) {
       setMessage('Completa los campos obligatorios.');
       return;
@@ -315,19 +325,19 @@ export default function Page() {
                 </select>
               </div>
               <input className="form-control mb-3" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar por nombre, zona o telefono" />
-              <div className="list-group">
-                {reports.map((report) => {
-                  const [label, cls] = statusMeta(report.status);
-                  return (
-                    <div
-                      key={report.id}
-                      role="button"
-                      tabIndex={0}
-                      className={`list-group-item list-group-item-action report-item p-0 overflow-hidden ${selected?.id === report.id ? 'active' : ''}`}
-                      onClick={() => setSelected(report)}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter' || event.key === ' ') setSelected(report);
-                      }}
+                <div className="reports-list">
+                  {reports.map((report) => {
+                    const [label, cls] = statusMeta(report.status);
+                    return (
+                      <div
+                        key={report.id}
+                        role="button"
+                        tabIndex={0}
+                        className={`report-item p-0 overflow-hidden ${selected?.id === report.id ? 'active' : ''}`}
+                        onClick={() => setSelected(report)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') setSelected(report);
+                        }}
                     >
                       <ReportCardMedia report={report} />
                       <div className="p-3 d-flex justify-content-between align-items-start gap-3">

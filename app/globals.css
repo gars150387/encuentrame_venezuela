@@ -46,6 +46,30 @@ body {
 .report-item.active {
   background: #eef4ff;
   border-color: #86a8ff;
+  box-shadow: 0 0.75rem 1.5rem rgba(78, 115, 223, 0.18);
+}
+
+.reports-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.reports-list .report-item {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 1.25rem rgba(15, 23, 42, 0.06);
+  background: #fff;
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.reports-list .report-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0.75rem 1.5rem rgba(15, 23, 42, 0.1);
+}
+
+.reports-list .report-item.active {
+  border-color: #86a8ff;
 }
 
 .report-media-wrap {
