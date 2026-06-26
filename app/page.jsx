@@ -12,6 +12,9 @@ const emptyForm = {
   edad: '',
   documento: '',
   señas: '',
+};
+
+const emptyLocalizeForm = {
   localizedByName: '',
   localizedByPhone: '',
   localizedNote: '',
@@ -52,6 +55,7 @@ export default function Page() {
   const [form, setForm] = useState(emptyForm);
   const [files, setFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
+  const [localizeForm, setLocalizeForm] = useState(emptyLocalizeForm);
   const [reports, setReports] = useState([]);
   const [selected, setSelected] = useState(null);
   const [stats, setStats] = useState(initialStats);
@@ -174,7 +178,7 @@ export default function Page() {
     event.preventDefault();
     if (!selected?.id) return;
 
-    if (!form.localizedByName || !form.localizedByPhone) {
+    if (!localizeForm.localizedByName || !localizeForm.localizedByPhone) {
       setMessage('Completa nombre y telefono de quien localizo.');
       return;
     }
@@ -183,9 +187,9 @@ export default function Page() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        localizedByName: form.localizedByName,
-        localizedByPhone: form.localizedByPhone,
-        localizedNote: form.localizedNote,
+        localizedByName: localizeForm.localizedByName,
+        localizedByPhone: localizeForm.localizedByPhone,
+        localizedNote: localizeForm.localizedNote,
         localizedReportedBy: clientId,
       }),
     });
@@ -199,6 +203,7 @@ export default function Page() {
     setMessage('Reporte marcado como localizada.');
     await fetchReports({ reset: true });
     setSelected(data);
+    setLocalizeForm(emptyLocalizeForm);
   }
 
   return (
@@ -280,18 +285,6 @@ export default function Page() {
                     </div>
                   </section>
                 )}
-
-                <section className="mb-3 mt-4 border-top pt-3">
-                  <h3 className="h6 text-uppercase text-secondary mb-3">Si ya fue localizada</h3>
-                  <div className="row g-3">
-                    <Field label="Nombre de quien localizo" value={form.localizedByName} onChange={(value) => setForm({ ...form, localizedByName: value })} />
-                    <Field label="Telefono de contacto" value={form.localizedByPhone} onChange={(value) => setForm({ ...form, localizedByPhone: value })} />
-                    <div className="col-12">
-                      <label className="form-label">Nota del hallazgo</label>
-                      <textarea className="form-control" rows="3" value={form.localizedNote} onChange={(e) => setForm({ ...form, localizedNote: e.target.value })} />
-                    </div>
-                  </div>
-                </section>
 
                 <div className="d-flex gap-2 justify-content-between mt-4">
                   <button type="button" className="btn btn-outline-secondary" disabled={step === 1} onClick={() => setStep((value) => Math.max(1, value - 1))}>Anterior</button>
@@ -385,6 +378,18 @@ export default function Page() {
                   <div className="d-flex flex-wrap gap-2 mt-3">
                     <button type="button" className="btn btn-primary btn-sm" onClick={markLocalized}>Marcar localizada</button>
                   </div>
+
+                  <section className="mt-4 border-top pt-3">
+                    <h3 className="h6 text-uppercase text-secondary mb-3">Datos de quien la localizo</h3>
+                    <div className="row g-3">
+                      <Field label="Nombre" value={localizeForm.localizedByName} onChange={(value) => setLocalizeForm({ ...localizeForm, localizedByName: value })} />
+                      <Field label="Telefono" value={localizeForm.localizedByPhone} onChange={(value) => setLocalizeForm({ ...localizeForm, localizedByPhone: value })} />
+                      <div className="col-12">
+                        <label className="form-label">Nota del hallazgo</label>
+                        <textarea className="form-control" rows="3" value={localizeForm.localizedNote} onChange={(e) => setLocalizeForm({ ...localizeForm, localizedNote: e.target.value })} />
+                      </div>
+                    </div>
+                  </section>
 
                   {selectedReport.localizedByName ? (
                     <div className="alert alert-light border mt-3 mb-0">
