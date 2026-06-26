@@ -21,6 +21,7 @@ const emptyLocalizeForm = {
 };
 
 const initialStats = { total: 0, unresolved: 0, pending: 0, confirmed: 0, disputed: 0, localized: 0, rejected: 0, withPhotos: 0 };
+const totalReportSteps = 4;
 
 function getClientId() {
   if (typeof window === 'undefined') return '';
@@ -144,8 +145,8 @@ export default function Page() {
       return;
     }
 
-    if (step < 3) {
-      setMessage('Pulsa Siguiente para continuar al paso de fotos.');
+    if (step < totalReportSteps) {
+      setMessage('Completa todos los pasos antes de enviar el reporte.');
       return;
     }
 
@@ -242,10 +243,10 @@ export default function Page() {
                   <h2 className="h4 mb-1">Nuevo reporte</h2>
                   <p className="text-secondary mb-0">Completa el flujo rapido de 3 pasos.</p>
                 </div>
-                <span className="badge text-bg-primary">Paso {step} de 3</span>
+                <span className="badge text-bg-primary">Paso {step} de {totalReportSteps}</span>
               </div>
               <div className="progress mb-4" style={{ height: 8 }}>
-                <div className="progress-bar" style={{ width: `${(step / 3) * 100}%` }} />
+                <div className="progress-bar" style={{ width: `${(step / totalReportSteps) * 100}%` }} />
               </div>
 
               <form ref={formRef} onSubmit={submitReport}>
@@ -291,12 +292,23 @@ export default function Page() {
                   </section>
                 )}
 
+                {step === 4 && (
+                  <section className="mb-3">
+                    <h3 className="h6 text-uppercase text-secondary mb-3">Revisar y enviar</h3>
+                    <div className="alert alert-light border mb-0">
+                      <div className="fw-semibold">{form.nombre} {form.apellidos}</div>
+                      <div className="small text-secondary">{form.direccion}</div>
+                      <div className="small">{files.length ? `${files.length} foto(s) agregada(s).` : 'Sin fotos agregadas.'}</div>
+                    </div>
+                  </section>
+                )}
+
                 <div className="d-flex gap-2 justify-content-between mt-4">
                   <button type="button" className="btn btn-outline-secondary" disabled={step === 1} onClick={() => setStep((value) => Math.max(1, value - 1))}>Anterior</button>
                   <div className="d-flex gap-2 flex-wrap justify-content-end">
                     <button type="button" className="btn btn-outline-primary" onClick={() => window.localStorage.setItem('encuentrame_draft_v1', JSON.stringify(form))}>Guardar borrador</button>
-                    {step < 3 ? (
-                      <button type="button" className="btn btn-primary" disabled={!canNext} onClick={() => setStep((value) => Math.min(3, value + 1))}>Siguiente</button>
+                    {step < totalReportSteps ? (
+                      <button type="button" className="btn btn-primary" disabled={!canNext} onClick={() => setStep((value) => Math.min(totalReportSteps, value + 1))}>Siguiente</button>
                     ) : (
                       <button type="submit" className="btn btn-success">Enviar reporte</button>
                     )}

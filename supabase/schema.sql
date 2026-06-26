@@ -30,6 +30,12 @@ create index if not exists reports_created_at_idx on public.reports (created_at 
 create index if not exists reports_normalized_name_idx on public.reports (normalized_name);
 create index if not exists reports_normalized_phone_idx on public.reports (normalized_phone);
 
+alter table public.reports add column if not exists localized_by_name text;
+alter table public.reports add column if not exists localized_by_phone text;
+alter table public.reports add column if not exists localized_note text;
+alter table public.reports add column if not exists localized_at timestamptz;
+alter table public.reports add column if not exists localized_reported_by text;
+
 create table if not exists public.audit_logs (
   id uuid primary key default gen_random_uuid(),
   report_id uuid references public.reports(id) on delete set null,
