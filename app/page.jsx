@@ -206,9 +206,16 @@ export default function Page() {
       return;
     }
 
+    const localizedReport = {
+      ...data,
+      localizedByName: data.localizedByName || localizeForm.localizedByName,
+      localizedByPhone: data.localizedByPhone || localizeForm.localizedByPhone,
+      localizedNote: data.localizedNote || localizeForm.localizedNote,
+    };
+
     setMessage('Reporte marcado como localizada.');
-    await fetchReports({ reset: true });
-    setSelected(data);
+    setReports((current) => current.map((report) => (report.id === localizedReport.id ? localizedReport : report)));
+    setSelected(localizedReport);
     setLocalizeForm(emptyLocalizeForm);
   }
 
@@ -408,11 +415,11 @@ export default function Page() {
                     </div>
                   </section>
 
-                  {selectedReport.localizedByName ? (
-                    <div className="alert alert-light border mt-3 mb-0">
-                      <div className="small text-secondary">Localizado por</div>
-                      <div className="fw-semibold">{selectedReport.localizedByName}</div>
-                      <div className="small">{selectedReport.localizedByPhone}</div>
+                  {selectedReport.status === 'localized' ? (
+                    <div className="alert alert-success border mt-3 mb-0">
+                      <div className="small text-success-emphasis">Informacion de quien localizo</div>
+                      <div className="fw-semibold">{selectedReport.localizedByName || 'Nombre no disponible'}</div>
+                      <div className="small">{selectedReport.localizedByPhone || 'Telefono no disponible'}</div>
                       {selectedReport.localizedNote ? <div className="small mt-1">{selectedReport.localizedNote}</div> : null}
                     </div>
                   ) : null}
