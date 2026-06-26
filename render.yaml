@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: encuentrame-app
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: ENCUENTRAME_DATA_FILE
+        value: ./data/reports.json

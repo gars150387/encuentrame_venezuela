@@ -1,0 +1,47 @@
+.step-panel {
+  min-height: 280px;
+}
+
+.card {
+  border-radius: 1rem;
+}
+
+.stat-card {
+  min-height: 100%;
+}
+
+.form-control,
+.form-select,
+.btn {
+  border-radius: 0.8rem;
+}
+
+.list-group-item {
+  border-radius: 0.75rem !important;
+  margin-bottom: 0.5rem;
+}
+
+.report-item.active {
+  background: #eef4ff;
+  border-color: #86a8ff;
+}
+
+.photo-pill {
+  display: inline-flex;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+.photo-pill img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.min-w-0 {
+  min-width: 0;
+}
