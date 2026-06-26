@@ -47,3 +47,22 @@ body {
   background: #eef4ff;
   border-color: #86a8ff;
 }
+
+.report-media-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, #1f2937, #111827);
+}
+
+.report-media-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.report-media-fallback {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, #374151, #111827);
+}

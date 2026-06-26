@@ -14,8 +14,6 @@ create table if not exists public.reports (
   document_id text,
   notes text,
   status text not null default 'pending',
-  vote_confirm_count integer not null default 0,
-  vote_deny_count integer not null default 0,
   has_photos boolean not null default false,
   photos jsonb not null default '[]'::jsonb,
   localized_by_name text,
@@ -32,21 +30,6 @@ create index if not exists reports_created_at_idx on public.reports (created_at 
 create index if not exists reports_normalized_name_idx on public.reports (normalized_name);
 create index if not exists reports_normalized_phone_idx on public.reports (normalized_phone);
 
-create table if not exists public.report_votes (
-  id uuid primary key default gen_random_uuid(),
-  report_id uuid not null references public.reports(id) on delete cascade,
-  voter_id text not null,
-  vote text not null check (vote in ('confirm', 'deny')),
-  source_ip text,
-  user_agent text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique (report_id, voter_id)
-);
-
-create index if not exists report_votes_report_idx on public.report_votes (report_id);
-create index if not exists report_votes_voter_idx on public.report_votes (voter_id);
-
 create table if not exists public.audit_logs (
   id uuid primary key default gen_random_uuid(),
   report_id uuid references public.reports(id) on delete set null,
@@ -62,5 +45,4 @@ create index if not exists audit_logs_report_idx on public.audit_logs (report_id
 create index if not exists audit_logs_created_at_idx on public.audit_logs (created_at desc);
 
 alter table public.reports enable row level security;
-alter table public.report_votes enable row level security;
 alter table public.audit_logs enable row level security;

@@ -7,7 +7,6 @@ const {
   saveReports,
   addReport,
   updateReportStatus,
-  voteOnReport,
   listReports,
   defaultReports,
 } = require('./reportStore');
@@ -140,23 +139,6 @@ function handleApi(req, res, pathname) {
     return parseBody(req)
       .then((body) => {
         const result = updateReportStatus(reports, id, body.status);
-        if (!result.ok) {
-          return sendJson(res, result.status, { error: result.error });
-        }
-
-        reports = result.reports;
-        saveReports(reports);
-        return sendJson(res, 200, result.report);
-      })
-      .catch((error) => sendJson(res, 400, { error: error.message }));
-  }
-
-  if (req.method === 'POST' && pathname.startsWith('/api/reports/') && pathname.endsWith('/vote')) {
-    const id = pathname.split('/')[3];
-    return parseBody(req)
-      .then((body) => {
-        const clientId = String(body.clientId || req.headers['x-client-id'] || '').trim();
-        const result = voteOnReport(reports, id, body.vote, clientId);
         if (!result.ok) {
           return sendJson(res, result.status, { error: result.error });
         }

@@ -23,7 +23,6 @@ const detailPanel = document.getElementById('detailPanel');
 const detailName = document.getElementById('detailName');
 const detailMeta = document.getElementById('detailMeta');
 const detailStatus = document.getElementById('detailStatus');
-const detailVotes = document.getElementById('detailVotes');
 const detailPhotos = document.getElementById('detailPhotos');
 const detailPhone = document.getElementById('detailPhone');
 const detailRelation = document.getElementById('detailRelation');
@@ -35,8 +34,6 @@ const statPending = document.getElementById('statPending');
 const statVerified = document.getElementById('statVerified');
 const statPhotos = document.getElementById('statPhotos');
 const systemAlert = document.getElementById('systemAlert');
-const voteConfirmBtn = document.getElementById('voteConfirmBtn');
-const voteDenyBtn = document.getElementById('voteDenyBtn');
 
 let currentStep = 1;
 let selectedReportId = null;
@@ -66,11 +63,8 @@ function setAlert(message, tone = 'warning') {
 }
 
 function statusLabel(status) {
-  if (status === 'confirmed') return { text: 'Confirmado', cls: 'text-bg-success' };
-  if (status === 'disputed') return { text: 'En disputa', cls: 'text-bg-warning' };
   if (status === 'localized') return { text: 'Localizado', cls: 'text-bg-primary' };
-  if (status === 'rejected') return { text: 'Rechazado', cls: 'text-bg-dark' };
-  return { text: 'Pendiente', cls: 'text-bg-secondary' };
+  return { text: 'Reportada', cls: 'text-bg-secondary' };
 }
 
 async function apiRequest(path, options = {}) {
@@ -181,7 +175,6 @@ function renderDetail(report) {
   detailMeta.textContent = `Creado el ${new Date(report.createdAt).toLocaleString('es-VE')}`;
   detailStatus.textContent = badge.text;
   detailStatus.className = `badge ${badge.cls}`;
-  detailVotes.textContent = `${report.voteTally?.confirm || 0} confirmaciones, ${report.voteTally?.deny || 0} negativas`;
   detailPhone.textContent = report.phone;
   detailRelation.textContent = report.relation;
   detailAddress.textContent = report.address;
@@ -429,16 +422,6 @@ loadMoreBtn.addEventListener('click', async () => {
   } catch {
     alert('No se pudieron cargar mas resultados.');
   }
-});
-
-voteConfirmBtn.addEventListener('click', (event) => {
-  event.preventDefault();
-  voteOnSelected('confirm');
-});
-
-voteDenyBtn.addEventListener('click', (event) => {
-  event.preventDefault();
-  voteOnSelected('deny');
 });
 
 exportBtn.addEventListener('click', async () => {

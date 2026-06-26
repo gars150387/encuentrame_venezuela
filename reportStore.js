@@ -24,8 +24,6 @@ const seedReports = [
     notes: 'Cicatriz pequeña en la ceja izquierda.',
     photos: [],
     status: 'pending',
-    voteTally: { confirm: 0, deny: 0 },
-    votesByClient: {},
     createdAt: '2026-06-20T12:00:00.000Z',
     updatedAt: '2026-06-20T12:00:00.000Z',
   },
@@ -42,8 +40,6 @@ const seedReports = [
     notes: 'Llevaba camisa azul y gorra negra.',
     photos: [],
     status: 'confirmed',
-    voteTally: { confirm: 4, deny: 1 },
-    votesByClient: {},
     createdAt: '2026-06-19T19:00:00.000Z',
     updatedAt: '2026-06-19T19:45:00.000Z',
   },
@@ -60,8 +56,6 @@ const seedReports = [
     notes: 'Tatuaje en antebrazo derecho.',
     photos: [],
     status: 'localized',
-    voteTally: { confirm: 7, deny: 0 },
-    votesByClient: {},
     createdAt: '2026-06-18T10:00:00.000Z',
     updatedAt: '2026-06-18T11:00:00.000Z',
   },
@@ -96,8 +90,6 @@ function normalizeReport(report) {
   return {
     ...report,
     status,
-    voteTally: { confirm: 0, deny: 0, ...(report.voteTally || {}) },
-    votesByClient: { ...(report.votesByClient || {}) },
   };
 }
 
@@ -160,8 +152,6 @@ function createReport(input = {}) {
     notes: String(input.señas || '').trim(),
     photos,
     status: 'pending',
-    voteTally: { confirm: 0, deny: 0 },
-    votesByClient: {},
     createdAt: now,
     updatedAt: now,
   };
@@ -191,17 +181,6 @@ function addReport(reports, input, options = {}) {
   return { ok: true, reports: [report, ...reports], report };
 }
 
-function autoStatusFromVotes(report) {
-  const confirm = report.voteTally?.confirm || 0;
-  const deny = report.voteTally?.deny || 0;
-
-  if (confirm >= 7 && confirm > deny) return 'confirmed';
-  if (deny >= 7 && deny > confirm) return 'rejected';
-  if (confirm >= 3 && confirm > deny) return 'confirmed';
-  if (deny >= 3 && deny >= confirm) return 'disputed';
-  return 'pending';
-}
-
 function updateReportStatus(reports, id, status) {
   if (!allowedStatuses.includes(status)) {
     return { ok: false, status: 400, error: 'invalid_status' };
@@ -220,47 +199,6 @@ function updateReportStatus(reports, id, status) {
   };
 
   return { ok: true, reports: next, report: next[index] };
-}
-
-function voteOnReport(reports, id, vote, clientId) {
-  if (!['confirm', 'deny'].includes(vote)) {
-    return { ok: false, status: 400, error: 'invalid_vote' };
-  }
-
-  if (!clientId) {
-    return { ok: false, status: 400, error: 'missing_client_id' };
-  }
-
-  const index = reports.findIndex((report) => report.id === id);
-  if (index === -1) {
-    return { ok: false, status: 404, error: 'not_found' };
-  }
-
-  const next = reports.slice();
-  const current = normalizeReport(next[index]);
-  const currentVote = current.votesByClient[clientId];
-  const tally = { confirm: current.voteTally.confirm || 0, deny: current.voteTally.deny || 0 };
-
-  if (currentVote === vote) {
-    return { ok: true, reports: next, report: current, unchanged: true };
-  }
-
-  if (currentVote) tally[currentVote] = Math.max(0, tally[currentVote] - 1);
-  tally[vote] += 1;
-
-  const nextReport = {
-    ...current,
-    voteTally: tally,
-    votesByClient: {
-      ...current.votesByClient,
-      [clientId]: vote,
-    },
-    status: autoStatusFromVotes({ ...current, voteTally: tally }),
-    updatedAt: new Date().toISOString(),
-  };
-
-  next[index] = nextReport;
-  return { ok: true, reports: next, report: nextReport };
 }
 
 function listReports(reports, query = {}) {
@@ -300,9 +238,7 @@ module.exports = {
   isDuplicate,
   addReport,
   updateReportStatus,
-  voteOnReport,
   listReports,
-  autoStatusFromVotes,
   normalizeReport,
   normalize,
   defaultReports,

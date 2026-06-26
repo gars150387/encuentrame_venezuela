@@ -31,11 +31,8 @@ function getClientId() {
 }
 
 function statusMeta(status) {
-  if (status === 'confirmed') return ['Confirmado', 'text-bg-success'];
-  if (status === 'disputed') return ['En disputa', 'text-bg-warning'];
   if (status === 'localized') return ['Localizado', 'text-bg-primary'];
-  if (status === 'rejected') return ['Rechazado', 'text-bg-dark'];
-  return ['Pendiente', 'text-bg-secondary'];
+  return ['Reportada', 'text-bg-secondary'];
 }
 
 function downloadJson(items) {
@@ -164,24 +161,6 @@ export default function Page() {
     setSelected(data);
   }
 
-  async function vote(voteValue) {
-    if (!selected?.id) return;
-    const response = await fetch(`/api/reports/${selected.id}/vote`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ vote: voteValue, voterId: clientId }),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      setMessage(data?.error || 'No se pudo registrar el voto.');
-      return;
-    }
-
-    setMessage('Voto registrado.');
-    await fetchReports({ reset: true });
-    setSelected(data);
-  }
-
   async function exportData() {
     const response = await fetch('/api/reports/export');
     const data = await response.json();
@@ -228,14 +207,14 @@ export default function Page() {
         <div>
           <span className="badge text-bg-danger-subtle text-danger border border-danger-subtle mb-2">MVP de emergencia</span>
           <h1 className="display-6 fw-bold mb-2">Base comunitaria de reportes</h1>
-          <p className="text-secondary mb-0">Registro, validacion por comunidad, fotos en storage externo y auditado desde el inicio.</p>
+          <p className="text-secondary mb-0">Registro de reportes y marcado de localizacion, con fotos en storage externo y auditoria activa.</p>
         </div>
         <div className="d-flex gap-2">
           <button className="btn btn-outline-secondary" onClick={exportData}>Exportar JSON</button>
         </div>
       </div>
 
-      <div className="alert alert-warning border-0 shadow-sm">{message || 'Los datos sensibles se validan por comunidad antes de consolidarse.'}</div>
+      <div className="alert alert-warning border-0 shadow-sm">{message || 'Los reportes se publican como reportada o localizada.'}</div>
 
       <div className="row g-4 mb-4">
         <StatCard title="Registrados" value={stats.total} />
@@ -290,7 +269,7 @@ export default function Page() {
 
                 {step === 3 && (
                   <section className="mb-3">
-                    <h3 className="h6 text-uppercase text-secondary mb-3">Fotos y confirmacion</h3>
+                    <h3 className="h6 text-uppercase text-secondary mb-3">Fotos del reporte</h3>
                     <div className="row g-3">
                       <div className="col-12">
                         <label className="form-label">Fotos</label>
@@ -298,12 +277,6 @@ export default function Page() {
                         <div className="form-text">Maximo 3 imagenes por reporte.</div>
                       </div>
                       <div className="col-12 d-flex flex-wrap gap-2">{previewUrls.map((url) => <span key={url} className="photo-pill"><img src={url} alt="preview" /></span>)}</div>
-                      <div className="col-12">
-                        <div className="form-check">
-                          <input className="form-check-input" type="checkbox" id="consent" required />
-                          <label className="form-check-label" htmlFor="consent">Confirmo que la informacion es correcta y acepto la revision comunitaria.</label>
-                        </div>
-                      </div>
                     </div>
                   </section>
                 )}
@@ -340,15 +313,12 @@ export default function Page() {
               <div className="d-flex align-items-center justify-content-between gap-3 mb-3">
                 <div>
                   <h2 className="h4 mb-1">Listado y busqueda</h2>
-                  <p className="text-secondary mb-0">La comunidad confirma o niega cada caso.</p>
+                  <p className="text-secondary mb-0">Solo reportada o localizada.</p>
                 </div>
                 <select className="form-select w-auto" value={status} onChange={(e) => setStatus(e.target.value)}>
                   <option value="all">Todos</option>
-                  <option value="pending">Pendientes</option>
-                  <option value="confirmed">Confirmados</option>
-                  <option value="disputed">En disputa</option>
-                  <option value="localized">Localizados</option>
-                  <option value="rejected">Rechazados</option>
+                  <option value="pending">Reportadas</option>
+                  <option value="localized">Localizadas</option>
                 </select>
               </div>
               <input className="form-control mb-3" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar por nombre, zona o telefono" />
@@ -356,8 +326,18 @@ export default function Page() {
                 {reports.map((report) => {
                   const [label, cls] = statusMeta(report.status);
                   return (
-                    <button key={report.id} type="button" className={`list-group-item list-group-item-action report-item ${selected?.id === report.id ? 'active' : ''}`} onClick={() => setSelected(report)}>
-                      <div className="d-flex justify-content-between align-items-start gap-3">
+                    <div
+                      key={report.id}
+                      role="button"
+                      tabIndex={0}
+                      className={`list-group-item list-group-item-action report-item p-0 overflow-hidden ${selected?.id === report.id ? 'active' : ''}`}
+                      onClick={() => setSelected(report)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') setSelected(report);
+                      }}
+                    >
+                      <ReportCardMedia report={report} />
+                      <div className="p-3 d-flex justify-content-between align-items-start gap-3">
                         <div className="min-w-0">
                           <div className="fw-semibold">{report.firstName} {report.lastName}</div>
                           <div className="small text-secondary">{report.address}</div>
@@ -365,7 +345,7 @@ export default function Page() {
                         </div>
                         <span className={`badge ${cls}`}>{label}</span>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -392,11 +372,6 @@ export default function Page() {
                     <span className={`badge ${statusMeta(selectedReport.status)[1]}`}>{statusMeta(selectedReport.status)[0]}</span>
                   </div>
 
-                  <div className="d-flex align-items-center justify-content-between mb-2">
-                    <div className="small text-secondary">Votos comunitarios</div>
-                    <div className="small fw-semibold">{selectedReport.voteTally?.confirm || 0} confirmaciones, {selectedReport.voteTally?.deny || 0} negativas</div>
-                  </div>
-
                   <div className="d-flex flex-wrap gap-2 mb-3">{(selectedReport.photos || []).map((photo) => photo.signedUrl ? <span key={photo.path} className="photo-pill"><img src={photo.signedUrl} alt={photo.name || 'foto'} /></span> : null)}</div>
 
                   <dl className="row mb-0">
@@ -408,8 +383,6 @@ export default function Page() {
                   </dl>
 
                   <div className="d-flex flex-wrap gap-2 mt-3">
-                    <button type="button" className="btn btn-success btn-sm" onClick={() => vote('confirm')}>Confirmar</button>
-                    <button type="button" className="btn btn-outline-danger btn-sm" onClick={() => vote('deny')}>Negar</button>
                     <button type="button" className="btn btn-primary btn-sm" onClick={markLocalized}>Marcar localizada</button>
                   </div>
 
@@ -430,7 +403,7 @@ export default function Page() {
             <div className="card-body p-4">
               <h2 className="h5 mb-3">Proceso</h2>
               <div className="d-flex justify-content-between mb-2"><span>Captura</span><span className="badge text-bg-primary">Lista</span></div>
-              <div className="d-flex justify-content-between mb-2"><span>Validacion</span><span className="badge text-bg-warning">Comunitaria</span></div>
+              <div className="d-flex justify-content-between mb-2"><span>Localizacion</span><span className="badge text-bg-primary">Manual</span></div>
               <div className="d-flex justify-content-between mb-2"><span>Auditoria</span><span className="badge text-bg-info">Activa</span></div>
               <div className="d-flex justify-content-between"><span>Escala</span><span className="badge text-bg-secondary">100K+ lista</span></div>
             </div>
@@ -468,6 +441,64 @@ function Field({ label, value, onChange, as = 'input', type = 'text', options = 
       ) : (
         <input className="form-control" type={type} value={value} onChange={(e) => onChange(e.target.value)} />
       )}
+    </div>
+  );
+}
+
+function ReportCardMedia({ report }) {
+  const photos = (report.photos || []).filter((photo) => photo?.signedUrl);
+
+  if (!photos.length) {
+    return (
+      <div className="report-media-fallback d-flex align-items-end p-3">
+        <div>
+          <div className="small text-white-50">Sin foto</div>
+          <div className="fw-semibold text-white">Falta imagen de referencia</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (photos.length === 1) {
+    return (
+      <div className="report-media-wrap">
+        <img className="report-media-img" src={photos[0].signedUrl} alt={photos[0].name || 'foto del reporte'} />
+      </div>
+    );
+  }
+
+  const carouselId = `carousel-${report.id}`;
+
+  return (
+    <div id={carouselId} className="carousel slide report-media-wrap" data-bs-ride="false">
+      <div className="carousel-indicators mb-0">
+        {photos.map((photo, index) => (
+          <button
+            key={photo.path || index}
+            type="button"
+            data-bs-target={`#${carouselId}`}
+            data-bs-slide-to={index}
+            className={index === 0 ? 'active' : ''}
+            aria-current={index === 0 ? 'true' : undefined}
+            aria-label={`Foto ${index + 1}`}
+          />
+        ))}
+      </div>
+      <div className="carousel-inner">
+        {photos.map((photo, index) => (
+          <div key={photo.path || index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
+            <img className="report-media-img" src={photo.signedUrl} alt={photo.name || `foto ${index + 1}`} />
+          </div>
+        ))}
+      </div>
+      <button className="carousel-control-prev" type="button" data-bs-target={`#${carouselId}`} data-bs-slide="prev">
+        <span className="carousel-control-prev-icon" aria-hidden="true" />
+        <span className="visually-hidden">Anterior</span>
+      </button>
+      <button className="carousel-control-next" type="button" data-bs-target={`#${carouselId}`} data-bs-slide="next">
+        <span className="carousel-control-next-icon" aria-hidden="true" />
+        <span className="visually-hidden">Siguiente</span>
+      </button>
     </div>
   );
 }

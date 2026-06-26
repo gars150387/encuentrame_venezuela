@@ -51,7 +51,6 @@ test('addReport creates a report and blocks duplicates', () => {
   assert.equal(allowed.ok, true);
   assert.equal(allowed.report.status, 'pending');
   assert.equal(allowed.report.firstName, 'Maria');
-  assert.deepEqual(allowed.report.voteTally, { confirm: 0, deny: 0 });
 });
 
 test('updateReportStatus updates the target report', () => {
@@ -61,19 +60,6 @@ test('updateReportStatus updates the target report', () => {
   assert.equal(result.ok, true);
   assert.equal(result.report.status, 'localized');
   assert.notEqual(result.report.updatedAt, '2026-06-20T12:00:00.000Z');
-});
-
-test('voteOnReport updates tallies and status automatically', () => {
-  let reports = store.defaultReports();
-  const first = store.voteOnReport(reports, 'seed-1', 'confirm', 'client-a');
-  reports = first.reports;
-  const second = store.voteOnReport(reports, 'seed-1', 'confirm', 'client-b');
-  reports = second.reports;
-  const third = store.voteOnReport(reports, 'seed-1', 'confirm', 'client-c');
-
-  assert.equal(third.ok, true);
-  assert.equal(third.report.voteTally.confirm, 3);
-  assert.equal(third.report.status, 'confirmed');
 });
 
 test('listReports paginates and returns stats', () => {

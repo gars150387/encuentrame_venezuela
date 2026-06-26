@@ -80,7 +80,7 @@
                     </section>
 
                     <section class="step-panel d-none" data-step="3">
-                      <h3 class="h6 text-uppercase text-secondary mb-3">Fotos y confirmación</h3>
+                      <h3 class="h6 text-uppercase text-secondary mb-3">Fotos del reporte</h3>
                       <div class="row g-3">
                         <div class="col-12">
                           <label class="form-label" for="fotos">Fotos</label>
@@ -88,7 +88,6 @@
                           <div id="photoHint" class="form-text">Máximo 3 imágenes por reporte.</div>
                         </div>
                         <div class="col-12"><div id="photoPreview" class="d-flex flex-wrap gap-2"></div></div>
-                        <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" id="consentimiento" required /><label class="form-check-label" for="consentimiento">Confirmo que la información es correcta y acepto la revisión antes de publicar.</label></div></div>
                       </div>
                     </section>
 
@@ -109,15 +108,12 @@
                   <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
                     <div>
                       <h2 class="h4 mb-1">Listado y búsqueda</h2>
-                      <p class="text-secondary mb-0">Filtra por nombre, zona o estado comunitario.</p>
+                      <p class="text-secondary mb-0">Filtra por nombre, zona o estado.</p>
                     </div>
                     <select id="statusFilter" class="form-select w-auto">
                       <option value="all">Todos</option>
-                      <option value="pending">Pendientes</option>
-                      <option value="confirmed">Confirmados</option>
-                      <option value="disputed">En disputa</option>
+                      <option value="pending">Reportadas</option>
                       <option value="localized">Localizados</option>
-                      <option value="rejected">Rechazados</option>
                     </select>
                   </div>
                   <input id="searchInput" class="form-control mb-3" placeholder="Buscar por nombre, zona o teléfono" />
@@ -139,10 +135,6 @@
                       <div><div id="detailName" class="h4 mb-1"></div><div id="detailMeta" class="text-secondary small"></div></div>
                       <span id="detailStatus" class="badge"></span>
                     </div>
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                      <div class="small text-secondary">Votos comunitarios</div>
-                      <div id="detailVotes" class="small fw-semibold"></div>
-                    </div>
                     <div id="detailPhotos" class="d-flex flex-wrap gap-2 mb-3"></div>
                     <dl class="row mb-0">
                       <dt class="col-5">Teléfono</dt><dd id="detailPhone" class="col-7"></dd>
@@ -152,8 +144,6 @@
                       <dt class="col-5">Señas</dt><dd id="detailNotes" class="col-7"></dd>
                     </dl>
                     <div class="d-flex flex-wrap gap-2 mt-3">
-                      <button id="voteConfirmBtn" class="btn btn-success btn-sm">Confirmar</button>
-                      <button id="voteDenyBtn" class="btn btn-outline-danger btn-sm">Negar</button>
                     </div>
                   </div>
                 </div>
@@ -163,9 +153,9 @@
                 <div class="card-body p-4">
                   <h2 class="h5 mb-3">Proceso</h2>
                   <div class="d-flex justify-content-between mb-2"><span>Captura</span><span class="badge text-bg-primary">Lista</span></div>
-                  <div class="d-flex justify-content-between mb-2"><span>Moderación</span><span class="badge text-bg-warning">Activa</span></div>
-                  <div class="d-flex justify-content-between mb-2"><span>Duplicados</span><span class="badge text-bg-info">Detectados</span></div>
-                  <div class="d-flex justify-content-between"><span>Publicación</span><span class="badge text-bg-secondary">Controlada</span></div>
+                  <div class="d-flex justify-content-between mb-2"><span>Localización</span><span class="badge text-bg-primary">Manual</span></div>
+                  <div class="d-flex justify-content-between mb-2"><span>Fotos</span><span class="badge text-bg-info">Activas</span></div>
+                  <div class="d-flex justify-content-between"><span>Publicación</span><span class="badge text-bg-secondary">Abierta</span></div>
                 </div>
               </div>
             </div>
