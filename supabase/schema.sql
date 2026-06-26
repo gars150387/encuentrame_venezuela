@@ -18,6 +18,11 @@ create table if not exists public.reports (
   vote_deny_count integer not null default 0,
   has_photos boolean not null default false,
   photos jsonb not null default '[]'::jsonb,
+  localized_by_name text,
+  localized_by_phone text,
+  localized_note text,
+  localized_at timestamptz,
+  localized_reported_by text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

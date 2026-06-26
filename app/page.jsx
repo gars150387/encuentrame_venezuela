@@ -12,9 +12,12 @@ const emptyForm = {
   edad: '',
   documento: '',
   señas: '',
+  localizedByName: '',
+  localizedByPhone: '',
+  localizedNote: '',
 };
 
-const initialStats = { total: 0, pending: 0, confirmed: 0, disputed: 0, localized: 0, rejected: 0, withPhotos: 0 };
+const initialStats = { total: 0, unresolved: 0, pending: 0, confirmed: 0, disputed: 0, localized: 0, rejected: 0, withPhotos: 0 };
 
 function getClientId() {
   if (typeof window === 'undefined') return '';
@@ -74,7 +77,7 @@ export default function Page() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const raw = window.localStorage.getItem('encuentrame_draft_v1');
+      const raw = window.localStorage.getItem('encuentrame_draft_v1');
     if (!raw) return;
 
     try {
@@ -188,6 +191,37 @@ export default function Page() {
   const selectedReport = reports.find((report) => report.id === selected?.id) || selected;
   const [statusLabel, statusClass] = statusMeta(selectedReport?.status);
 
+  async function markLocalized(event) {
+    event.preventDefault();
+    if (!selected?.id) return;
+
+    if (!form.localizedByName || !form.localizedByPhone) {
+      setMessage('Completa nombre y telefono de quien localizo.');
+      return;
+    }
+
+    const response = await fetch(`/api/reports/${selected.id}/localize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        localizedByName: form.localizedByName,
+        localizedByPhone: form.localizedByPhone,
+        localizedNote: form.localizedNote,
+        localizedReportedBy: clientId,
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      setMessage(data?.error || 'No se pudo marcar como localizada.');
+      return;
+    }
+
+    setMessage('Reporte marcado como localizada.');
+    await fetchReports({ reset: true });
+    setSelected(data);
+  }
+
   return (
     <main className="container py-4 py-md-5">
       <div className="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
@@ -204,9 +238,9 @@ export default function Page() {
       <div className="alert alert-warning border-0 shadow-sm">{message || 'Los datos sensibles se validan por comunidad antes de consolidarse.'}</div>
 
       <div className="row g-4 mb-4">
-        <StatCard title="Reportes" value={stats.total} />
-        <StatCard title="Pendientes" value={stats.pending} />
-        <StatCard title="Confirmados" value={stats.confirmed} />
+        <StatCard title="Registrados" value={stats.total} />
+        <StatCard title="Por localizar" value={stats.unresolved} />
+        <StatCard title="Localizados" value={stats.localized} />
         <StatCard title="Con foto" value={stats.withPhotos} />
       </div>
 
@@ -273,6 +307,18 @@ export default function Page() {
                     </div>
                   </section>
                 )}
+
+                <section className="mb-3 mt-4 border-top pt-3">
+                  <h3 className="h6 text-uppercase text-secondary mb-3">Si ya fue localizada</h3>
+                  <div className="row g-3">
+                    <Field label="Nombre de quien localizo" value={form.localizedByName} onChange={(value) => setForm({ ...form, localizedByName: value })} />
+                    <Field label="Telefono de contacto" value={form.localizedByPhone} onChange={(value) => setForm({ ...form, localizedByPhone: value })} />
+                    <div className="col-12">
+                      <label className="form-label">Nota del hallazgo</label>
+                      <textarea className="form-control" rows="3" value={form.localizedNote} onChange={(e) => setForm({ ...form, localizedNote: e.target.value })} />
+                    </div>
+                  </div>
+                </section>
 
                 <div className="d-flex gap-2 justify-content-between mt-4">
                   <button type="button" className="btn btn-outline-secondary" disabled={step === 1} onClick={() => setStep((value) => Math.max(1, value - 1))}>Anterior</button>
@@ -362,9 +408,19 @@ export default function Page() {
                   </dl>
 
                   <div className="d-flex flex-wrap gap-2 mt-3">
-                    <button className="btn btn-success btn-sm" onClick={() => vote('confirm')}>Confirmar</button>
-                    <button className="btn btn-outline-danger btn-sm" onClick={() => vote('deny')}>Negar</button>
+                    <button type="button" className="btn btn-success btn-sm" onClick={() => vote('confirm')}>Confirmar</button>
+                    <button type="button" className="btn btn-outline-danger btn-sm" onClick={() => vote('deny')}>Negar</button>
+                    <button type="button" className="btn btn-primary btn-sm" onClick={markLocalized}>Marcar localizada</button>
                   </div>
+
+                  {selectedReport.localizedByName ? (
+                    <div className="alert alert-light border mt-3 mb-0">
+                      <div className="small text-secondary">Localizado por</div>
+                      <div className="fw-semibold">{selectedReport.localizedByName}</div>
+                      <div className="small">{selectedReport.localizedByPhone}</div>
+                      {selectedReport.localizedNote ? <div className="small mt-1">{selectedReport.localizedNote}</div> : null}
+                    </div>
+                  ) : null}
                 </>
               )}
             </div>
